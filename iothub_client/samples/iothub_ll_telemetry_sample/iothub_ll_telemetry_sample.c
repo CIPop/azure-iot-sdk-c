@@ -26,8 +26,8 @@ and removing calls to _DoWork will yield the same results. */
 
 // The protocol you wish to use should be uncommented
 //
-#define SAMPLE_MQTT
-//#define SAMPLE_MQTT_OVER_WEBSOCKETS
+//#define SAMPLE_MQTT
+#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
 //#define SAMPLE_HTTP
@@ -50,8 +50,8 @@ and removing calls to _DoWork will yield the same results. */
 
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "[device connection string]";
-#define MESSAGE_COUNT        5
+static const char* connectionString = "";
+#define MESSAGE_COUNT        10
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 
@@ -74,7 +74,38 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     }
     else
     {
-        (void)printf("The device client has been disconnected\r\n");
+        char *reasonString;
+        switch (reason)
+        {
+            case IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_NO_NETWORK:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_NO_NETWORK";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE";
+                break;
+            case IOTHUB_CLIENT_CONNECTION_OK:
+                reasonString = "IOTHUB_CLIENT_CONNECTION_OK";
+                break;
+            default:
+                reasonString = "Unknown";
+                break;
+        }
+        (void)printf("The device client has been disconnected. Reason: %s\r\n", reasonString);
     }
 }
 
@@ -139,6 +170,23 @@ int main(void)
         //IoTHubDeviceClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
+        int lifetimeSeconds = 10;
+        if(IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_SAS_TOKEN_LIFETIME, &lifetimeSeconds) != IOTHUB_CLIENT_OK)
+        {
+            printf("ERROR: Failed to configure SAS token lifetime.\r\n");
+        }
+        
+        HTTP_PROXY_OPTIONS proxyOptions;
+        proxyOptions.host_address = "127.0.0.1";
+        proxyOptions.port = 8888;
+        proxyOptions.password = NULL;
+        proxyOptions.username = NULL;
+
+        if(IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_HTTP_PROXY, &proxyOptions) != IOTHUB_CLIENT_OK)
+        {
+            printf("ERROR: Failed to configure proxy.\r\n");
+        }
+
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
 
@@ -174,13 +222,14 @@ int main(void)
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-            ThreadAPI_Sleep(1);
+            ThreadAPI_Sleep(2000);
 
         } while (g_continueRunning);
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_LL_Destroy(device_ll_handle);
     }
+
     // Free all the sdk subsystem
     IoTHub_Deinit();
 
