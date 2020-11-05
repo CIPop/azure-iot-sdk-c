@@ -51,29 +51,108 @@ and removing calls to _DoWork will yield the same results. */
     #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/* Paste in the your x509 iothub connection string  */
-/*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
-static const char* connectionString = "[device connection string]";
+
+//#define TPM2TSS
+#define ISKS
+//#define PKCS11
+//#define ZYMBIT
+//#define PEM
+
+#ifdef TPM2TSS
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=tpm2engine;x509=true";
+
+static const char* opensslEngine = "tpm2tss";
+static const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
+"A1UEAwwKdHBtMmVuZ2luZTAeFw0yMDExMDQyMzQyNDJaFw0yMTExMDQyMzQyNDJa\n"
+"MBUxEzARBgNVBAMMCnRwbTJlbmdpbmUwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNC\n"
+"AAT8+wQr2MJV6x/ds+IWc0mknJbE8QIRHEHaW6BopGHd6Xll5aBvHt/HtSCHCXcX\n"
+"IcUscCQpMZJh18ZuYYamn+ovMAoGCCqGSM49BAMCA0kAMEYCIQD3ERO717bt6lDy\n"
+"OkZcAK4VBLwYnoH+glXK6pWqDkXE0wIhAM0OFOTbVIuXOGDXaCKxFLIvMifo2RJZ\n"
+"b5pjgB2gaGGi\n"
+"-----END CERTIFICATE-----\n";
+
+static const char* x509privatekey = "/home/cristian/cert/tpm2ec.tss";
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef ISKS
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=iot-key-service1;x509=true";
+
+static const char* opensslEngine = "aziot_keys";
+static const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
+"A1UEAwwQaW90LWtleS1zZXJ2aWNlMTAeFw0yMDEwMzAwMDQwMTZaFw0yMTEwMzAw\n"
+"MDQwMTZaMBsxGTAXBgNVBAMMEGlvdC1rZXktc2VydmljZTEwWTATBgcqhkjOPQIB\n"
+"BggqhkjOPQMBBwNCAARuUKXqZvNDCOhqdRMhOluD5xpm00E5arOXbqrqrCrOhjT4\n"
+"7o3NamR9UPuC3Nbp9qTckzcQMoWPu9hgGkbniBN0MAoGCCqGSM49BAMCA0kAMEYC\n"
+"IQC2hvx3haS3kxpIQzrzsKKpWlAGed0z7dn2HOY4x5bzlwIhAKyYtxbF62laYahF\n"
+"DItkq1MHqzqExB1eTrMHQVY11w62\n"
+"-----END CERTIFICATE-----\n";
+
+static const char* x509privatekey = "sr=eyJrZXlfaWQiOnsiS2V5UGFpciI6ImRldmljZS1pZCJ9LCJub25jZSI6IjJyZkYzS0VtWXFOU1ZnMjFRbmRhMW0rSzlCckZuWno5YUY1d2pqRkJac0JkY0dJOEZ2QmxzVklzQ2tsdElyTVRsNzU0cDdnMTRlRHU4akZrMkdrY2pBPT0ifQ==&sig=QxGpUHV/7luBuuVciE7QzN//E0KnZa+Bi/z0HDrEliM=";
+
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef PKCS11
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=iot-key-service1;x509=true";
+
+static const char* opensslEngine = "pkcs11";
+static const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
+"A1UEAwwQaW90LWtleS1zZXJ2aWNlMTAeFw0yMDEwMzAwMDQwMTZaFw0yMTEwMzAw\n"
+"MDQwMTZaMBsxGTAXBgNVBAMMEGlvdC1rZXktc2VydmljZTEwWTATBgcqhkjOPQIB\n"
+"BggqhkjOPQMBBwNCAARuUKXqZvNDCOhqdRMhOluD5xpm00E5arOXbqrqrCrOhjT4\n"
+"7o3NamR9UPuC3Nbp9qTckzcQMoWPu9hgGkbniBN0MAoGCCqGSM49BAMCA0kAMEYC\n"
+"IQC2hvx3haS3kxpIQzrzsKKpWlAGed0z7dn2HOY4x5bzlwIhAKyYtxbF62laYahF\n"
+"DItkq1MHqzqExB1eTrMHQVY11w62\n"
+"-----END CERTIFICATE-----\n";
+
+static const char* x509privatekey = "pkcs11:object=ec-privkey;type=private?pin-value=1234";
+
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef ZYMBIT
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=zymbit1;x509=true";
+
+static const char* opensslEngine = "zymkey_ssl";
+static const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBHzCBxQIUSkrcj/IZolIF8bag1qGE7knh+gwwCgYIKoZIzj0EAwIwEjEQMA4G\n"
+"A1UEAwwHenltYml0MTAeFw0yMDExMjEwMTAxMDdaFw0yMTExMjEwMTAxMDdaMBIx\n"
+"EDAOBgNVBAMMB3p5bWJpdDEwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQoAbhf\n"
+"GBxWqiy6PUcznGg0kDn3tVst7Ab1Spi8znxdW5BzgrwMWppY7ua8O1wGMJC6PHca\n"
+"EtjYZcD71Ms8EDDKMAoGCCqGSM49BAMCA0kAMEYCIQDl+KHVLez7H2sDDfMWiNLu\n"
+"TPHo7zyIQp8JFdJe91nngAIhAMoMOYh98vn6UOvkkRXIQSiuwgbop3wUr7+QKHTZ\n"
+"VOQU\n"
+"-----END CERTIFICATE-----\n";
+
+static const char* x509privatekey = "nonzymkey.key";
+
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef PEM
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=iot-key-service1;x509=true";
 
 static const char* x509certificate =
-"-----BEGIN CERTIFICATE-----""\n"
-"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls""\n"
-"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD""\n"
-"...""\n"
-"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2""\n"
-"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE""\n"
-"dkyVdoGPCXc=""\n"
-"-----END CERTIFICATE-----";
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
+"A1UEAwwQaW90LWtleS1zZXJ2aWNlMTAeFw0yMDEwMzAwMDQwMTZaFw0yMTEwMzAw\n"
+"MDQwMTZaMBsxGTAXBgNVBAMMEGlvdC1rZXktc2VydmljZTEwWTATBgcqhkjOPQIB\n"
+"BggqhkjOPQMBBwNCAARuUKXqZvNDCOhqdRMhOluD5xpm00E5arOXbqrqrCrOhjT4\n"
+"7o3NamR9UPuC3Nbp9qTckzcQMoWPu9hgGkbniBN0MAoGCCqGSM49BAMCA0kAMEYC\n"
+"IQC2hvx3haS3kxpIQzrzsKKpWlAGed0z7dn2HOY4x5bzlwIhAKyYtxbF62laYahF\n"
+"DItkq1MHqzqExB1eTrMHQVY11w62\n"
+"-----END CERTIFICATE-----\n";
 
 static const char* x509privatekey =
-"-----BEGIN RSA PRIVATE KEY-----""\n"
-"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v""\n"
-"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN""\n"
-"...""\n"
-"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF""\n"
-"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k""\n"
-"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=""\n"
-"-----END RSA PRIVATE KEY-----";
+#endif
 
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
@@ -133,8 +212,8 @@ int main(void)
     {
         // Set any option that are neccessary.
         // For available options please see the iothub_sdk_options.md documentation
-        //bool traceOn = true;
-        //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
+        bool traceOn = true;
+        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
         // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
@@ -151,6 +230,10 @@ int main(void)
 #endif
         // Set the X509 certificates in the SDK
         if (
+#ifndef PEM
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_ENGINE, opensslEngine) != IOTHUB_CLIENT_OK) ||
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509keyengine) != IOTHUB_CLIENT_OK) ||
+#endif
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
             )
