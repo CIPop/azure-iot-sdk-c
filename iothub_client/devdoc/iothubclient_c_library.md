@@ -475,29 +475,52 @@ By default messages never expire. The meaning of the messageTimeout value is the
     - 0 = disable message timeout for all messages send by _SendAsync from now on
     - Any other number - consider that number as the timeout.
 - "x509certificate" - feeds a x509 certificate in PEM format to IoTHubClient to be used for 
-authentication. value is a pointer to a null terminated string that contains the certificate. Example:
+authentication. value is a pointer to a null terminated string that contains the certificate. Important: certain TLS stacks are sensitive to line terminators. Example:
 ```c
 const char* value =
-"-----BEGIN CERTIFICATE-----"
-"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls"
-"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD"
+"-----BEGIN CERTIFICATE-----\n"
+"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls\n"
+"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD\n"
 ...
-"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2"
-"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE"
-"dkyVdoGPCXc="
-"-----END CERTIFICATE-----";
+"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2\n"
+"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE\n"
+"dkyVdoGPCXc=\n"
+"-----END CERTIFICATE-----\n";
 ```
-- "x509privatekey" - feed a x509 private key in PEM format to IoTHubClient to be used for authentication. value is a pointer to a null terminated string that contains the key. Example:
+- "x509privatekey" - feed a x509 private key in PEM format to IoTHubClient to be used for authentication. value is a pointer to a null terminated string that contains the key. Important: certain TLS stacks are sensitive to line terminators. Example:
 ```c
 const char* privateKey = 
-"-----BEGIN RSA PRIVATE KEY-----"            
-"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v"
-"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN"
+"-----BEGIN RSA PRIVATE KEY-----\n"            
+"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v\n"
+"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN\n"
 ...
-"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF"
-"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k"
-"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc="        
-"-----END RSA PRIVATE KEY-----";
+"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF\n"
+"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k\n"
+"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=\n"        
+"-----END RSA PRIVATE KEY-----\n";
+```
+
+- "OPENSSLOPT_ENGINE" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. This option changes the meaning of the `x509privatekey` option to be used as the key identifier. value is a null terminated string that contains the engine name. Examples:
+```c
+// Example using Azure IoT Key Service
+const char* openssl_engine = "aziot_keys";
+const char* privateKey = "<key_handle>"; // Replace with assigned key handle.
+```
+
+```c
+// Example using TPM TSS OpenSSL ENGINE
+const char* openssl_engine = "tpm2tss";
+// When the TPM2TSS engine is used, the key identifier is a path to a PEM-encoded TSS2 private key:
+const char* privateKey = "/home/restricted_user/tpm2ec.tss"
+```
+
+- __[[DESIGN QUESTION]]__ "OPENSSLOPT_UI_METHOD" - only available when OpenSSL is used. It specifies the [OpenSSL UI_METHOD](https://www.openssl.org/docs/man1.1.1/man3/UI_new_method.html) used to prompt and read passwords required to access the private key for ENGINE private keys (__[[DESIGN QUESTION]]__ and for encrypted PEM files.). Example:
+
+```c
+#include <openssl/ui.h>
+
+static UI_METHOD *ui_method;
+// initialize ui_method (see https://github.com/openssl/openssl/blob/master/apps/lib/apps_ui.c#L115 for an example)
 ```
 
 ## IotHubClient\_LL\_... APIs
