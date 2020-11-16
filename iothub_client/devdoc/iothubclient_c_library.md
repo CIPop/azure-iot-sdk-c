@@ -500,9 +500,13 @@ const char* privateKey =
 "-----END RSA PRIVATE KEY-----\n";
 ```
 
-- "OPENSSLOPT_ENGINE" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. This option changes the meaning of the `x509privatekey` option to be used as the key identifier. value is a null terminated string that contains the engine name. Examples:
+- "OPENSSLOPT_ENGINE" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. This option changes the meaning of the `x509certificate` and `x509privatekey` options to be used as the certificate identifier and key identifier respectively. value is a null terminated string that contains the engine name.
+- "OPENSSLOPT_ENGINE_CERT_TYPE" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the public key is loaded using the OpenSSL Engine. The `x509certificate` option represents the engine-specific certificate identifier.
+- "OPENSSLOPT_ENGINE_KEY_TYPE" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
+
+OpenSSL ENGINE Examples:
 ```c
-// Example using Azure IoT Key Service
+// Example using Azure IoT Identity, Key and Certificate Services
 const char* openssl_engine = "aziot_keys";
 const char* privateKey = "<key_handle>"; // Replace with assigned key handle.
 ```
@@ -513,8 +517,6 @@ const char* openssl_engine = "tpm2tss";
 // When the TPM2TSS engine is used, the key identifier is a path to a PEM-encoded TSS2 private key:
 const char* privateKey = "/home/restricted_user/tpm2ec.tss"
 ```
-
-- __[[DESIGN QUESTION]]__ "OPENSSLOPT_UI_METHOD" - only available when OpenSSL is used. It specifies the [OpenSSL UI_METHOD](https://www.openssl.org/docs/man1.1.1/man3/UI_new_method.html) used to prompt and read passwords required to access the private key for ENGINE private keys (__[[DESIGN QUESTION]]__ and for encrypted PEM files.). Example:
 
 ```c
 #include <openssl/ui.h>
