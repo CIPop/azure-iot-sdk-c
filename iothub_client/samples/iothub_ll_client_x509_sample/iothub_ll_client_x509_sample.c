@@ -82,7 +82,7 @@ static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
 static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=iot-key-service1;x509=true";
 
-static const char* opensslEngine = "aziotkeys";
+static const char* opensslEngine = "aziot_keys";
 static const char* x509certificate = 
 "-----BEGIN CERTIFICATE-----\n"
 "MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
