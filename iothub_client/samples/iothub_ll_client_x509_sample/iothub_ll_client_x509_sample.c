@@ -51,6 +51,12 @@ and removing calls to _DoWork will yield the same results. */
     #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+
+//#define TPM2TSS
+#define ISKS
+//#define ISKS_DIRECT
+
+#ifdef TPM2TSS
 /* Paste in the your x509 iothub connection string  */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
 static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=tpm2engine;x509=true";
@@ -69,6 +75,34 @@ static const char* x509certificate =
 
 static const char* x509privatekey = "/home/cristian/cert/tpm2ec.tss";
 static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef ISKS
+/* Paste in the your x509 iothub connection string  */
+/*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=iot-key-service1;x509=true";
+
+static const char* opensslEngine = "aziotkeys";
+static const char* x509certificate = 
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
+"A1UEAwwQaW90LWtleS1zZXJ2aWNlMTAeFw0yMDEwMzAwMDQwMTZaFw0yMTEwMzAw\n"
+"MDQwMTZaMBsxGTAXBgNVBAMMEGlvdC1rZXktc2VydmljZTEwWTATBgcqhkjOPQIB\n"
+"BggqhkjOPQMBBwNCAARuUKXqZvNDCOhqdRMhOluD5xpm00E5arOXbqrqrCrOhjT4\n"
+"7o3NamR9UPuC3Nbp9qTckzcQMoWPu9hgGkbniBN0MAoGCCqGSM49BAMCA0kAMEYC\n"
+"IQC2hvx3haS3kxpIQzrzsKKpWlAGed0z7dn2HOY4x5bzlwIhAKyYtxbF62laYahF\n"
+"DItkq1MHqzqExB1eTrMHQVY11w62\n"
+"-----END CERTIFICATE-----\n";
+
+static const char* x509privatekey = "sr=eyJrZXlfaWQiOnsiS2V5UGFpciI6ImRldmljZS1pZCJ9LCJub25jZSI6IlQ2eWo3cE0vMHY5anAyNm5qL2NFWUdNZjFTL2lSRGdKMnpEeWpoNkQycE52S0FhdStEdGNhNXNkd2dWbGZKaVlkbHJKeG5wOE1XdmpDcnhmd1A4eHhRPT0ifQ==&sig=wITb99HtU/zGwtvKYW6dlkjtPK2ljVqUjmC9gqvZTmw=";
+
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef ISKS_DIRECT
+
+
+#endif
 
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
