@@ -489,7 +489,7 @@ const char* value =
 ```
 - "x509privatekey" - feed a x509 private key in PEM format to IoTHubClient to be used for authentication. value is a pointer to a null terminated string that contains the key. Important: certain TLS stacks are sensitive to line terminators. Example:
 ```c
-const char* privateKey = 
+const char* x509privatekey = 
 "-----BEGIN RSA PRIVATE KEY-----\n"            
 "MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v\n"
 "qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN\n"
@@ -500,22 +500,35 @@ const char* privateKey =
 "-----END RSA PRIVATE KEY-----\n";
 ```
 
-- "OPENSSLOPT_ENGINE" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. This option changes the meaning of the `x509certificate` and `x509privatekey` options to be used as the certificate identifier and key identifier respectively. value is a null terminated string that contains the engine name.
-- "OPENSSLOPT_ENGINE_CERT_TYPE" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the public key is loaded using the OpenSSL Engine. The `x509certificate` option represents the engine-specific certificate identifier.
-- "OPENSSLOPT_ENGINE_KEY_TYPE" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
+- "CypherSuite" - only available when OpenSSL is used. value is a pointer to a null terminated string that contains a list in the format specified by [SSL_set_cipher_list](https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set_cipher_list.html).
+- "Engine" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. This option changes the meaning of the `x509certificate` and `x509privatekey` options to be used as the certificate identifier and key identifier respectively. value is a null terminated string that contains the engine name.
+- "x509CertificateType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the public key is loaded using the OpenSSL Engine. The `x509certificate` option represents the engine-specific certificate identifier. Defaults to PEM string.
+- "x509PrivatekeyType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier. Defaults to PEM string.
 
 OpenSSL ENGINE Examples:
 ```c
 // Example using Azure IoT Identity, Key and Certificate Services
 const char* openssl_engine = "aziot_keys";
-const char* privateKey = "<key_handle>"; // Replace with assigned key handle.
+const char* x509privatekey = "<key_handle>"; // Replace with assigned key handle.
+const long x509privatekeytype = 1;
 ```
 
 ```c
 // Example using TPM TSS OpenSSL ENGINE
 const char* openssl_engine = "tpm2tss";
+
+// When the TPM2TSS engine is used, the public certificate is loaded from a PEM string.
+const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
+// [...]
+"OkZcAK4VBLwYnoH+glXK6pWqDkXE0wIhAM0OFOTbVIuXOGDXaCKxFLIvMifo2RJZ\n"
+"b5pjgB2gaGGi\n"
+"-----END CERTIFICATE-----\n";
+
 // When the TPM2TSS engine is used, the key identifier is a path to a PEM-encoded TSS2 private key:
-const char* privateKey = "/home/restricted_user/tpm2ec.tss"
+const long x509privatekeytype = 1;
+const char* x509privatekey = "/home/restricted_user/tpm2ec.tss"
 ```
 
 ```c

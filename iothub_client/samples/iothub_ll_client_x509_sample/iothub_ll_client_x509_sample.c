@@ -55,6 +55,7 @@ and removing calls to _DoWork will yield the same results. */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
 static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=tpm2engine;x509=true";
 
+static const char* opensslEngine = "tpm2tss";
 static const char* x509certificate =
 "-----BEGIN CERTIFICATE-----\n"
 "MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
@@ -67,6 +68,7 @@ static const char* x509certificate =
 "-----END CERTIFICATE-----\n";
 
 static const char* x509privatekey = "/home/cristian/cert/tpm2ec.tss";
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
@@ -137,8 +139,11 @@ int main(void)
 
         // Set the X509 certificates in the SDK
         if (
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_ENGINE, opensslEngine) != IOTHUB_CLIENT_OK) ||
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
-            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK) || 
+            //(IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CERT_TYPE, &x509keyengine) != IOTHUB_CLIENT_OK) || 
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509keyengine) != IOTHUB_CLIENT_OK)
             )
         {
             printf("failure to set options for x509, aborting\r\n");
