@@ -502,14 +502,13 @@ const char* x509privatekey =
 
 - "CypherSuite" - only available when OpenSSL is used. value is a pointer to a null terminated string that contains a list in the format specified by [SSL_set_cipher_list](https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set_cipher_list.html).
 - "Engine" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. value is a null terminated string that contains the engine name.
-- "x509CertificateType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the public key is loaded using the OpenSSL Engine. The `x509certificate` option represents the engine-specific certificate identifier.
 - "x509PrivatekeyType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
 
 OpenSSL ENGINE Examples:
 ```c
 // Example using Azure IoT Identity, Key and Certificate Services
 const char* openssl_engine = "aziot_keys";
-const char* x509privatekey = "<key_handle>"; // Replace with assigned key handle.
+const char* x509privatekey = "sr=eyJrZXlfaWQiOnsiS2V5UGFpciI6ImRldmljZS...zGwtvKYW6dlkjtPK2ljVqUjmC9gqvZTmw=""; // Replace with assigned key handle.
 const long x509privatekeytype = 1;
 ```
 
@@ -532,10 +531,17 @@ const char* x509privatekey = "/home/restricted_user/tpm2ec.tss"
 ```
 
 ```c
-#include <openssl/ui.h>
+// Example using PKCS#11 OpenSSL ENGINE
+static const char* opensslEngine = "pkcs11";
+static const char* x509certificate = 
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
+// [...]
+"DItkq1MHqzqExB1eTrMHQVY11w62\n"
+"-----END CERTIFICATE-----\n";
 
-static UI_METHOD *ui_method;
-// initialize ui_method (see https://github.com/openssl/openssl/blob/master/apps/lib/apps_ui.c#L115 for an example)
+static const char* x509privatekey = "pkcs11:object=ec-privkey;type=private?pin-value=1234";
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 ```
 
 ## IotHubClient\_LL\_... APIs
