@@ -139,7 +139,7 @@ static const char* x509certificate =
 "VOQU\n"
 "-----END CERTIFICATE-----\n";
 
-static const char* x509privatekey = "";
+static const char* x509privatekey = "nonzymkey.key";
 
 static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 #endif
