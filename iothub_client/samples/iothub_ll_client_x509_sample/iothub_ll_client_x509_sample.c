@@ -53,8 +53,9 @@ and removing calls to _DoWork will yield the same results. */
 
 
 //#define TPM2TSS
-#define ISKS
+//#define ISKS
 //#define PKCS11
+#define ZYMBIT
 
 #ifdef TPM2TSS
 /* Paste in the your x509 iothub connection string  */
@@ -83,7 +84,7 @@ static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=iot-key-service1;x509=true";
 
 static const char* opensslEngine = "aziot_keys";
-static const char* x509certificate =
+static const char* x509certificate 
 "-----BEGIN CERTIFICATE-----\n"
 "MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
 "A1UEAwwQaW90LWtleS1zZXJ2aWNlMTAeFw0yMDEwMzAwMDQwMTZaFw0yMTEwMzAw\n"
@@ -117,6 +118,28 @@ static const char* x509certificate =
 "-----END CERTIFICATE-----\n";
 
 static const char* x509privatekey = "pkcs11:object=ec-privkey;type=private?pin-value=1234";
+
+static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
+#endif
+
+#ifdef ZYMBIT
+/* Paste in the your x509 iothub connection string  */
+/*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
+static const char* connectionString = "HostName=crispop-iothub1.azure-devices.net;DeviceId=zymbit1;x509=true";
+
+static const char* opensslEngine = "zymkey_ssl";
+static const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBHzCBxQIUSkrcj/IZolIF8bag1qGE7knh+gwwCgYIKoZIzj0EAwIwEjEQMA4G\n"
+"A1UEAwwHenltYml0MTAeFw0yMDExMjEwMTAxMDdaFw0yMTExMjEwMTAxMDdaMBIx\n"
+"EDAOBgNVBAMMB3p5bWJpdDEwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQoAbhf\n"
+"GBxWqiy6PUcznGg0kDn3tVst7Ab1Spi8znxdW5BzgrwMWppY7ua8O1wGMJC6PHca\n"
+"EtjYZcD71Ms8EDDKMAoGCCqGSM49BAMCA0kAMEYCIQDl+KHVLez7H2sDDfMWiNLu\n"
+"TPHo7zyIQp8JFdJe91nngAIhAMoMOYh98vn6UOvkkRXIQSiuwgbop3wUr7+QKHTZ\n"
+"VOQU\n"
+"-----END CERTIFICATE-----\n";
+
+static const char* x509privatekey = "";
 
 static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 #endif
