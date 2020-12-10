@@ -17,7 +17,7 @@ CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 cmake . -Bcmake -Duse_openssl:BOOL=ON -Drun_e2e_tests:BOOL=ON -Drun_e2e_openssl_engine_tests:BOOL=ON -Drun_valgrind:BOOL=ON
 cd cmake
 
-make --jobs=$CORES
+make --jobs=$((CORES * 4))
 
 # Configure OpenSSL with PKCS#11 Engine and SoftHSM
 # 1. Create new test token.
