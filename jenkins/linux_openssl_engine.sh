@@ -21,6 +21,7 @@ make --jobs=$((CORES * 4))
 
 # Configure OpenSSL with PKCS#11 Engine and SoftHSM
 # 1. Create new test token.
+softhsm2-util --delete-token --token test-token > /dev/null
 softhsm2-util --init-token --slot 0 --label test-token --pin 1234 --so-pin 4321
 # 2. Convert key from PKCS#1 to PKCS#8
 echo $IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 | base64 --decode > test-key.pem
@@ -34,4 +35,4 @@ pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so -l -p 1234 --token test-tok
 # Run OpenSSL Engine tests
 ctest -j $CORES --output-on-failure
 
-softhsm2-util --delete-token --token test-token
+
